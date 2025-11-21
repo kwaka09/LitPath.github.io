@@ -36,12 +36,13 @@
 			position: relative;
 			overflow-x: hidden;
 		}
+		* { box-sizing: border-box; }
 		.map-blurred-bg {
 			position: fixed;
 			top: 0;
 			left: 0;
-			width: 100vw;
-			height: 100vh;
+			right: 0;
+			bottom: 0;
 			background: url('MapBG.png');
 			background-size: cover;
 			background-position: center;
@@ -52,8 +53,8 @@
 			position: fixed;
 			top: 0;
 			left: 0;
-			width: 100vw;
-			height: 100vh;
+			right: 0;
+			bottom: 0;
 			background: rgba(41,83,215,0.07);
 			z-index: 1;
 			pointer-events: none;
@@ -63,6 +64,7 @@
 			color: #fff;
 			padding: 0.75rem 1rem;
 			display: flex;
+			flex-wrap: wrap;
 			justify-content: space-between;
 			align-items: center;
 			z-index: 10;
@@ -541,19 +543,20 @@
       }
       return path.length > 1 ? path : null;
     }
-    function showScreen(id) {
-      let screens = document.querySelectorAll('.screen');
-      screens.forEach(scr => {
-        scr.classList.remove('active');
-        scr.style.zIndex = 1;
-        scr.style.position = 'absolute';
-      });
-      const target = document.getElementById(id);
-      target.classList.add('active');
-      target.style.zIndex = 100;
-      target.style.position = 'static';
-      if (id === 'map') setTimeout(initLeafletMap, 100);
-    }
+		function showScreen(id) {
+			// Toggle the active screen without applying absolute positioning
+			document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+			const el = document.getElementById(id);
+			if (!el) return;
+			el.classList.add('active');
+			// Hooks
+			if (id === 'map') setTimeout(initLeafletMap, 100);
+			if (id === 'reports-received') updateReportsList();
+			// If route screen is shown, also invalidate route map size after display
+			if (id === 'route' && typeof routeMap !== 'undefined' && routeMap) {
+				setTimeout(() => { try { routeMap.invalidateSize(); } catch (e) {} }, 250);
+			}
+		}
     let mapInitialized = false;
     function initLeafletMap() {
       if (mapInitialized) return;
