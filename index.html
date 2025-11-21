@@ -7,6 +7,19 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
 	<style>
+		/* Responsive nav toggle */
+		.nav-links { display:flex; gap:0.6rem; align-items:center; }
+		.nav-actions { display:flex; gap:0.5rem; align-items:center; }
+		.nav-toggle { display:none; background:none; border:none; color:#fff; cursor:pointer; }
+		@media (max-width: 800px) {
+			.nav-links { display:none; flex-direction:column; width:100%; padding:0.5rem 0; }
+			.nav-links.open { display:flex; }
+			.nav-links .nav-link { width:100%; text-align:left; padding:0.6rem 0.5rem; border-radius:6px; }
+			.nav-actions { margin-left:0; }
+			.nav-toggle { display:inline-flex; align-items:center; justify-content:center; }
+			.navbar { align-items:flex-start; }
+			.navbar .navbar-logo { flex: 0 0 auto; }
+		}
 			body.dark-mode { background: #181a20; color: #e0e0e0; }
 			body.dark-mode .container { background: #23272f; color: #e0e0e0; box-shadow: 0 4px 24px rgba(0,0,0,0.45); }
 			body.dark-mode .navbar { background: #23272f; color: #e0e0e0; }
@@ -313,19 +326,22 @@
 <body>
   <div class="map-blurred-bg"></div>
   <div class="map-blur-overlay"></div>
-  <nav class="navbar">
-	<span class="navbar-logo" style="font-family:cursive; font-size:1.7em; font-weight:bold; color:#fde47f; margin-right:1.2em; display:flex; align-items:center;">LitPath</span>
-  <button onclick="showScreen('home')" class="button-ripple">Home</button>
-  <button onclick="showScreen('map')" class="button-ripple">Map</button>
-  <button onclick="showScreen('route')" class="button-ripple">Route Planner</button>
-	<button onclick="showScreen('report')" class="button-ripple">Report Light</button>
-	<button onclick="showScreen('reports-received')" class="button-ripple">Reports Received</button>
-	<span style="margin-left:auto; display:flex; gap:0.5em;">
-		<button id="darkModeToggle" class="button-ripple" title="Toggle Dark Mode" style="font-size:1.3em; padding:0.5em 0.9em;">&#9790;</button>
-		<button onclick="showScreen('profile')" class="button-ripple" title="Profile" style="font-size:1.3em; padding:0.5em 0.9em;">&#128100;</button>
-		<button onclick="showScreen('help')" class="button-ripple" title="Help" style="font-size:1.3em; padding:0.5em 0.9em;">&#10067;</button>
-	</span>
-  </nav>
+	<nav class="navbar">
+		<span class="navbar-logo" style="font-family:cursive; font-size:1.7em; font-weight:bold; color:#fde47f; margin-right:1.2em; display:flex; align-items:center;">LitPath</span>
+		<button id="navToggle" class="nav-toggle button-ripple" aria-expanded="false" aria-label="Toggle menu" style="font-size:1.2em; padding:0.45em 0.7em;">&#9776;</button>
+		<div class="nav-links">
+			<button onclick="showScreen('home')" class="nav-link button-ripple">Home</button>
+			<button onclick="showScreen('map')" class="nav-link button-ripple">Map</button>
+			<button onclick="showScreen('route')" class="nav-link button-ripple">Route Planner</button>
+			<button onclick="showScreen('report')" class="nav-link button-ripple">Report Light</button>
+			<button onclick="showScreen('reports-received')" class="nav-link button-ripple">Reports Received</button>
+		</div>
+		<div class="nav-actions" style="margin-left:auto; display:flex; gap:0.5em;">
+			<button id="darkModeToggle" class="button-ripple" title="Toggle Dark Mode" style="font-size:1.3em; padding:0.5em 0.9em;">&#9790;</button>
+			<button onclick="showScreen('profile')" class="button-ripple" title="Profile" style="font-size:1.3em; padding:0.5em 0.9em;">&#128100;</button>
+			<button onclick="showScreen('help')" class="button-ripple" title="Help" style="font-size:1.3em; padding:0.5em 0.9em;">&#10067;</button>
+		</div>
+	</nav>
   <section class="container">
 		<div id="home" class="screen active">
 			<div class="container">
@@ -546,6 +562,32 @@
         btn.addEventListener('click', buttonRippleHandler);
       });
     }
+
+		function setupNavToggle() {
+			const toggle = document.getElementById('navToggle');
+			const links = document.querySelector('.nav-links');
+			if (!toggle || !links) return;
+			toggle.addEventListener('click', () => {
+				const isOpen = links.classList.toggle('open');
+				toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+			});
+			// Close menu on nav link click (mobile)
+			links.querySelectorAll('button').forEach(b => {
+				b.addEventListener('click', () => {
+					if (window.innerWidth <= 800) {
+						links.classList.remove('open');
+						toggle.setAttribute('aria-expanded', 'false');
+					}
+				});
+			});
+			// Ensure menu closes when resizing larger
+			window.addEventListener('resize', () => {
+				if (window.innerWidth > 800) {
+					links.classList.remove('open');
+					toggle.setAttribute('aria-expanded', 'false');
+				}
+			});
+		}
     function buttonRippleHandler(e) {
       const btn = e.currentTarget;
       const ripple = document.createElement('span');
@@ -560,6 +602,7 @@
     }
     document.addEventListener('DOMContentLoaded', addRippleToButtons);
     setTimeout(addRippleToButtons, 500);
+	document.addEventListener('DOMContentLoaded', setupNavToggle);
 
     // Make sure all relevant buttons in Welcome and Report page have the .button-ripple class
     document.addEventListener('DOMContentLoaded', () => {
