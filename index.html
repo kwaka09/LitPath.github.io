@@ -548,21 +548,24 @@ body::-webkit-scrollbar, .container::-webkit-scrollbar { display:none; }
   <div class="map-blurred-bg"></div>
   <div class="map-blur-overlay"></div>
 	<nav class="navbar">
-		<span class="navbar-logo" style="font-family:cursive; font-size:1.7em; font-weight:bold; color:#fde47f; margin-right:1.2em; display:flex; align-items:center;">LitPath</span>
-		<button id="navToggle" class="nav-toggle button-ripple" aria-expanded="false" aria-label="Toggle menu" style="font-size:1.2em; padding:0.45em 0.7em;">&#9776;</button>
-		<div class="nav-links">
-			<button onclick="showScreen('home')" class="nav-link button-ripple">Home</button>
-			<button onclick="showScreen('map')" class="nav-link button-ripple">Map</button>
-			<button onclick="showScreen('route')" class="nav-link button-ripple">Route Planner</button>
-			<button onclick="showScreen('report')" class="nav-link button-ripple">Report Light</button>
-			<button onclick="showScreen('reports-received')" class="nav-link button-ripple">Reports Received</button>
-		</div>
-		<div class="nav-actions" style="margin-left:auto; display:flex; gap:0.5em;">
-			<button id="darkModeToggle" class="button-ripple" title="Toggle Dark Mode" style="font-size:1.3em; padding:0.5em 0.9em;">&#9790;</button>
-			<button onclick="showScreen('profile')" class="button-ripple" title="Profile" style="font-size:1.3em; padding:0.5em 0.9em;">&#128100;</button>
-			<button onclick="showScreen('help')" class="button-ripple" title="Help" style="font-size:1.3em; padding:0.5em 0.9em;">&#10067;</button>
-		</div>
-	</nav>
+  <div class="navbar-logo-wrap">
+    <span class="navbar-logo">LitPath</span>
+    <button id="navToggle" class="nav-toggle button-ripple" aria-label="Toggle menu">&#9776;</button>
+  </div>
+  <div class="nav-links">
+    <button onclick="showScreen('home')" class="nav-link button-ripple">Home</button>
+    <button onclick="showScreen('map')" class="nav-link button-ripple">Map</button>
+    <button onclick="showScreen('route')" class="nav-link button-ripple">Route Planner</button>
+    <button onclick="showScreen('report')" class="nav-link button-ripple">Report Light</button>
+    <button onclick="showScreen('reports-received')" class="nav-link button-ripple">Reports Received</button>
+  </div>
+  <div class="nav-actions">
+    <button id="darkModeToggle" class="button-ripple" title="Toggle Dark Mode">&#9790;</button>
+    <button onclick="showScreen('profile')" class="button-ripple" title="Profile">&#128100;</button>
+    <button onclick="showScreen('help')" class="button-ripple" title="Help">&#10067;</button>
+  </div>
+</nav>
+
   <section class="container">
 		<div id="home" class="screen active">
 			<div class="container">
@@ -976,6 +979,7 @@ body::-webkit-scrollbar, .container::-webkit-scrollbar { display:none; }
   </script>
 </body>
 </html>
+
 
 
 
