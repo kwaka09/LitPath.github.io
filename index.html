@@ -7,6 +7,102 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
 	<style>
+		/* Universal: body and container centering for mobile */
+@media (max-width: 600px) {
+  body {
+    padding: 0;
+    margin: 0;
+  }
+  .container {
+    /* Center content vertically and horizontally */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 90vh;
+    margin: 0 !important;
+    padding: 1.2em .6em;
+    box-sizing: border-box;
+    max-width: 100vw;
+    width: 100vw;
+  }
+  .screen.active {
+    padding: 0 !important;
+  }
+  h1, h2 {
+    font-size: 1.4em;
+    margin-bottom: 0.5em;
+    text-align: center;
+  }
+}
+
+/* Mobile navbar: center logo, stack links */
+@media (max-width:800px) {
+  .navbar {
+    flex-direction: column;
+    align-items: center;
+    padding: 0.6em 0.4em;
+  }
+  .navbar-logo {
+    margin: 0 auto 0.4em auto;
+    text-align: center;
+    width: 100vw;
+  }
+  .nav-links {
+    justify-content: center;
+    align-items: center;
+    gap: .4rem;
+    width: 100vw;
+  }
+  .nav-actions {
+    justify-content: center !important;
+    width: 100vw;
+    margin: 0 auto;
+    gap: .4rem;
+  }
+}
+
+/* Inputs and buttons full-width and spaced for mobile */
+@media (max-width: 600px) {
+  .input-group input, .input-group textarea, .input-group select {
+    width: 100vw;
+    max-width: 98vw;
+    font-size: 1.03em;
+  }
+  button.cta, .center-buttons > button {
+    width: 98vw;
+    max-width: 280px;
+    margin: 0.7em auto;
+    font-size: 1.1em;
+    padding: 1em 0.1em;
+  }
+}
+
+/* Map adjustments for mobile centering */
+@media (max-width:600px) {
+  #mapid, #route-map {
+    display: block;
+    margin: 1em auto;
+    width: 98vw !important;
+    max-width: 99vw !important;
+    height: 42vh !important;
+    border-radius: 10px;
+  }
+}
+
+/* Route list and feedback spacing on mobile */
+@media (max-width:600px) {
+  .route-list, #reports-list, .feedback {
+    width: 98vw;
+    margin: 1em auto;
+    font-size: 1.10em;
+  }
+}
+
+/* Hide scrollbars (optional for aesthetic) */
+body::-webkit-scrollbar, .container::-webkit-scrollbar { display:none; }
+
+		
 		/* Responsive nav toggle */
 		.nav-links { display:flex; gap:0.6rem; align-items:center; }
 		.nav-actions { display:flex; gap:0.5rem; align-items:center; }
