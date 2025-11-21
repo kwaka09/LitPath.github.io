@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LitPath</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+  <style>
+			body.dark-mode { background: #181a20; color: #e0e0e0; }
+			body.dark-mode .container { background: #23272f; color: #e0e0e0; box-shadow: 0 4px 24px rgba(0,0,0,0.45); }
+			body.dark-mode .navbar { background: #23272f; color: #e0e0e0; }
+			body.dark-mode .navbar-logo { color: #ffd700 !important; }
+			body.dark-mode .button-ripple, body.dark-mode .main-button, body.dark-mode .cta { background: linear-gradient(87deg,#23272f 60%,#315788 100%); color: #ffd700; border: none; }
+			body.dark-mode input, body.dark-mode textarea, body.dark-mode select { background: #23272f; color: #ffd700; border: 1px solid #444; }
+			body.dark-mode .route-list li { background: #23272f; color: #ffd700; }
+			body.dark-mode .feedback { background: #23272f; border-left: 4px solid #ffd700; color: #ffd700; }
+		body {
+			font-family: 'Segoe UI', sans-serif;
+			margin: 0;
+			background: #f4f7fa;
+			min-height: 100vh;
+			position: relative;
+			overflow-x: hidden;
+		}
+		.map-blurred-bg {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100vw;
+			height: 100vh;
+			background: url('MapBG.png');
+			background-size: cover;
+			background-position: center;
+			filter: blur(12px) brightness(0.8);
+			z-index: 0;
+		}
+		.map-blur-overlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100vw;
+			height: 100vh;
+			background: rgba(41,83,215,0.07);
+			z-index: 1;
+			pointer-events: none;
+		}
+		.navbar {
+			background: #232b38;
+			color: #fff;
+			padding: 1rem;
+			display: flex;
+			justify-content: center;
+			gap: 1.5em;
+			align-items: center;
+			z-index: 10;
+			position: relative;
+		}
+		.navbar button {
+			background: none;
+			border: none;
+			color: #fff;
+			font-weight: bold;
+			cursor: pointer;
+			font-size: 1rem;
+			padding: 0.5em 1.25em;
+			position: relative;
+			overflow: hidden;
+			transition: background 0.15s, color 0.15s, transform 0.1s;
+			margin: 0 0.3em;
+			display: inline-block;
+			text-align: center;
+		}
+		.navbar button.button-ripple {
+			background: linear-gradient(87deg,#315788 60%,#3aa1ec 100%);
+			color: #fff;
+			border: none;
+			border-radius: 32px;
+			box-shadow: 0 7px 30px rgba(49,87,136,0.20), 0 1.5px 8px rgba(49,87,136,0.13);
+			font-size: 1.05em;
+			font-weight: 700;
+			transition: background 0.18s, box-shadow 0.25s, transform 0.15s, color 0.20s;
+		}
+		.navbar button.button-ripple:hover,
+		.navbar button.button-ripple:focus {
+			background: linear-gradient(87deg,#3aa1ec 15%,#315788 84%);
+			color: #fde47f;
+			transform: scale(1.04) translateY(-2px);
+			box-shadow: 0 12px 48px rgba(58,161,236,0.14), 0 2px 8px rgba(58,161,236,0.12);
+		}
+		.navbar button.button-ripple:active {
+			background: linear-gradient(120deg,#315788 76%,#3aa1ec 43%);
+			transform: scale(0.97);
+			color: #fff;
+		}
+		.button-ripple {
+			position: relative;
+			overflow: hidden;
+		}
+		.button-ripple span.ripple {
+			position: absolute;
+			border-radius: 50%;
+			transform: scale(0);
+			animation: ripple 0.6s linear;
+			background-color: #fff4;
+			pointer-events: none;
+			width: 100px;
+			height: 100px;
+			opacity: 0.8;
+			z-index: 3;
+			left: 50%;
+			top: 50%;
+			margin-left: -50px;
+			margin-top: -50px;
+		}
+		@keyframes ripple {
+			to {
+				transform: scale(3.5);
+				opacity: 0;
+			}
+		}
+		.screen {
+			opacity: 0;
+			transform: translateY(32px);
+			transition: opacity 0.45s, transform 0.5s;
+			z-index: 100;
+			pointer-events: none;
+			position: absolute;
+			top: 80px;
+			left: 0;
+			width: 100%;
+			min-height: calc(100vh - 80px);
+			background: transparent;
+			display: flex;
+			justify-content: center;
+			align-items: flex-start;
+		}
+		.screen.active {
+			opacity: 1;
+			transform: translateY(0);
+			pointer-events: auto;
+			position: static;
+			z-index: 100;
+			display: flex;
+			justify-content: center;
+		}
+		.container {
+			width: calc(100vw - 1in);
+			margin: 2rem 0.5in;
+			background: #fff;
+			border-radius: 14px;
+			box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+			position: relative;
+			min-height: 480px;
+			z-index: 101;
+			padding-bottom: 2.6em;
+		}
+    h1, h2 { color: #315788; text-align: center; }
+    .input-group { margin-bottom: 1rem; }
+    label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
+		input, textarea, select {
+			width: 100%;
+			padding: 0.5rem;
+			border-radius: 4px;
+			border: 1px solid #bbb;
+			box-sizing: border-box;
+			margin: 0;
+		}
+    input[list] { background: #eff4fa; font-size:1rem; }
+    select { background: #eff4fa; font-size:1rem; }
+		button.cta {
+			background: #315788;
+			color: #fff;
+			padding: 0.7rem 2rem;
+			border: none;
+			border-radius: 4px;
+			font-size: 1rem;
+			font-weight: 600;
+			margin-top: 0.5em;
+			transition: background 0.18s, transform 0.12s;
+			position: relative;
+			overflow: hidden;
+			display: block;
+			margin-left: auto;
+			margin-right: auto;
+			text-align: center;
+		}
+		button.cta.button-ripple {
+			border-radius: 32px;
+			background: linear-gradient(87deg,#315788 60%,#3aa1ec 100%);
+			font-size: 1.12em;
+			font-weight: 700;
+			box-shadow: 0 7px 30px rgba(49,87,136,0.20), 0 1.5px 8px rgba(49,87,136,0.13);
+			transition: background 0.18s, box-shadow 0.25s, transform 0.15s, color 0.20s;
+		}
+		button.cta.button-ripple:hover,
+		button.cta.button-ripple:focus {
+			background: linear-gradient(87deg,#3aa1ec 15%,#315788 84%);
+			color: #fde47f;
+			transform: scale(1.04) translateY(-2px);
+			box-shadow: 0 12px 48px rgba(58,161,236,0.14), 0 2px 8px rgba(58,161,236,0.12);
+		}
+		button.cta.button-ripple:active {
+			background: linear-gradient(120deg,#315788 76%,#3aa1ec 43%);
+			transform: scale(0.97);
+			color: #fff;
+		}
+		.center-buttons > button {
+			display: block;
+			width: 80%;
+			margin: 1.2em auto;
+			text-align: center;
+			font-size: 1.12em;
+			font-weight: 700;
+			letter-spacing: 0.015em;
+			background: linear-gradient(87deg,#315788 60%,#3aa1ec 100%);
+			color: #fff;
+			border: none;
+			border-radius: 32px;
+			box-shadow: 0 7px 30px rgba(49,87,136,0.20), 0 1.5px 8px rgba(49,87,136,0.13);
+			transition: background 0.18s, box-shadow 0.25s, transform 0.15s, color 0.20s;
+			position: relative;
+			padding: 1em 0;
+			outline: none;
+			overflow: hidden;
+			cursor: pointer;
+		}
+		.center-buttons > button.button-ripple span.ripple,
+		button.cta.button-ripple span.ripple,
+		.navbar button.button-ripple span.ripple {
+			position: absolute;
+			border-radius: 50%;
+			transform: scale(0);
+			animation: ripple 0.6s linear;
+			background-color: #fff8;
+			pointer-events: none;
+			width: 110px;
+			height: 110px;
+			opacity: 0.8;
+			z-index: 3;
+			left: 50%;
+			top: 50%;
+			margin-left: -55px;
+			margin-top: -55px;
+		}
+
+    ul.route-list, ul.help-info { list-style: none; padding: 0; }
+    ul.route-list li { background: #d1e8f6; padding: 0.75rem; margin: 0.4rem 0; border-radius: 4px; }
+    .map-placeholder, #mapid { background: #bdd4e7; border-radius: 8px; height: 280px; }
+    #mapid { width: 100%; }
+    .user-profile-box { padding: 1rem; background: #eff4f9; border-radius: 8px; margin-bottom: 1rem; }
+    .feedback { background: #e0ffe5; border-left: 4px solid #4caf50; padding: 0.5rem 1rem; margin-top: 1rem; border-radius: 5px;}
+    section.container { transition: box-shadow 0.32s; }
+    #route-map-container { margin-top:1.5em; }
+	#route-map { width:100%; height:270px; border-radius:8px; background:#bdd4e7; }
+  </style>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+<script>
+		// Dark mode toggle
+		document.addEventListener('DOMContentLoaded', function() {
+			const darkModeBtn = document.getElementById('darkModeToggle');
+			if (darkModeBtn) {
+				darkModeBtn.addEventListener('click', function() {
+					document.body.classList.toggle('dark-mode');
+					darkModeBtn.innerHTML = document.body.classList.contains('dark-mode') ? '&#9728;' : '&#9790;';
+				});
+			}
+		});
+	// Store reports in memory
+	const reports = [];
+
+	// Handle report submission
+	document.addEventListener('DOMContentLoaded', function() {
+		const reportForm = document.querySelector('#report form');
+		if (reportForm) {
+			reportForm.addEventListener('submit', function(e) {
+				e.preventDefault();
+				const location = document.getElementById('location').value.trim();
+				const desc = document.getElementById('desc').value.trim();
+				if (location && desc) {
+					reports.push({ location, desc, date: new Date().toLocaleString() });
+					updateReportsList();
+				}
+				document.getElementById('feedback-msg').style.display = 'block';
+				reportForm.reset();
+			});
+		}
+	});
+
+	// Update the reports received list
+	function updateReportsList() {
+		const list = document.getElementById('reports-list');
+		if (!list) return;
+		if (reports.length === 0) {
+			list.innerHTML = '<li>No reports received yet.</li>';
+			return;
+		}
+		list.innerHTML = reports.map(r => `<li><b>${r.location}</b><br>${r.desc}<br><small>${r.date}</small></li>`).join('');
+	}
+
+	// Show correct screen and update reports if needed
+	function showScreen(screenId) {
+		document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+		const el = document.getElementById(screenId);
+		if (el) {
+			el.classList.add('active');
+			if (screenId === 'reports-received') updateReportsList();
+		}
+	}
+</script>
+</head>
+<body>
+  <div class="map-blurred-bg"></div>
+  <div class="map-blur-overlay"></div>
+  <nav class="navbar">
+	<span class="navbar-logo" style="font-family:cursive; font-size:1.7em; font-weight:bold; color:#fde47f; margin-right:1.2em; display:flex; align-items:center;">LitPath</span>
+  <button onclick="showScreen('home')" class="button-ripple">Home</button>
+  <button onclick="showScreen('map')" class="button-ripple">Map</button>
+  <button onclick="showScreen('route')" class="button-ripple">Route Planner</button>
+	<button onclick="showScreen('report')" class="button-ripple">Report Light</button>
+	<button onclick="showScreen('reports-received')" class="button-ripple">Reports Received</button>
+	<span style="margin-left:auto; display:flex; gap:0.5em;">
+		<button id="darkModeToggle" class="button-ripple" title="Toggle Dark Mode" style="font-size:1.3em; padding:0.5em 0.9em;">&#9790;</button>
+		<button onclick="showScreen('profile')" class="button-ripple" title="Profile" style="font-size:1.3em; padding:0.5em 0.9em;">&#128100;</button>
+		<button onclick="showScreen('help')" class="button-ripple" title="Help" style="font-size:1.3em; padding:0.5em 0.9em;">&#10067;</button>
+	</span>
+  </nav>
+  <section class="container">
+		<div id="home" class="screen active">
+			<div class="container">
+				<h1 style="text-align:center; font-family:cursive;">LitPath Map</h1>
+				<p style="text-align:center;">Find safe, well-lit walking routes, report broken lights, and help your community stay safe after dark.</p>
+				<div class="center-buttons">
+					<button class="button-ripple" onclick="showScreen('map')">Find Lighted Routes</button>
+					<button class="button-ripple" onclick="showScreen('route')">Plan Your Route</button>
+					<button class="button-ripple" onclick="showScreen('report')">Report Lighting Issue</button>
+				</div>
+			</div>
+		</div>
+		<div id="reports-received" class="screen">
+			<div class="container">
+				<h2 style="text-align:center; font-family:cursive;">Reports Received</h2>
+				<ul id="reports-list" class="route-list">
+					<!-- Reports will be dynamically inserted here -->
+				</ul>
+			</div>
+		</div>
+    <div id="map" class="screen">
+      <div class="container">
+        <h2>View Map of LitPath</h2>
+        <div id="mapid"></div>
+        <ul class="route-list">
+          <li>Harrison Road: Well lit &#x2728;</li>
+          <li>Shuntug Street: Lights Out &#9888;&#65039;</li>
+          <li>Abanao Street: Dimly Lit</li>
+        </ul>
+      </div>
+    </div>
+    <div id="report" class="screen">
+			<div class="container">
+				<h2>Report Lighting Issues</h2>
+				<form>
+          <div class="input-group">
+            <label for="location">Street/Location</label>
+            <input type="text" id="location" placeholder="e.g. Pine Street, near 7-11">
+          </div>
+          <div class="input-group">
+            <label for="desc">Issue Description</label>
+            <textarea id="desc" rows="3" placeholder="Lamp post not working, flickering, etc."></textarea>
+          </div>
+          <button type="submit" class="cta button-ripple">Submit Report</button>
+        </form>
+        <div id="feedback-msg" class="feedback" style="display:none;">
+          Thank you! Your issue has been reported.
+        </div>
+      </div>
+    </div>
+    <div id="route" class="screen">
+      <div class="container">
+        <h2>Plan Your Safe Walk Route</h2>
+        <form id="route-form" onsubmit="event.preventDefault(); handleRoute();">
+          <div class="input-group">
+            <label for="from">From (type or select Baguio landmark/street)</label>
+            <input list="from-list" id="from" name="from" autocomplete="off" placeholder="e.g. Burnham Park, Session Road" required>
+            <datalist id="from-list"></datalist>
+          </div>
+          <div class="input-group">
+            <label for="to">To (type or select Baguio landmark/street)</label>
+            <input list="to-list" id="to" name="to" autocomplete="off" placeholder="e.g. SM Baguio, Wright Park" required>
+            <datalist id="to-list"></datalist>
+          </div>
+		  <button type="submit" class="cta button-ripple" onclick="showScreen('route')">Show Lighted Route</button>
+        </form>
+        <div id="route-map-container">
+	<div id="route-map"></div>
+        </div>
+	<ul id="routes" class="route-list"></ul>
+      </div>
+    </div>
+		<div id="profile" class="screen">
+			<div class="container">
+				<h2>User Profile</h2>
+				<div class="user-profile-box" id="profile-view">
+					<b>Name:</b> <span id="profile-name">Jane Doe</span><br>
+					<b>Email:</b> <span id="profile-email">janedoe@email.com</span><br>
+					<b>Preferred Area:</b> <span id="profile-area">Downtown</span>
+				</div>
+
+				<div id="profile-edit" style="display:none; margin-top:1rem;">
+					<div class="input-group">
+						<label for="edit-name">Name</label>
+						<input type="text" id="edit-name" placeholder="Your full name">
+					</div>
+					<div class="input-group">
+						<label for="edit-email">Email</label>
+						<input type="email" id="edit-email" placeholder="you@example.com">
+					</div>
+					<div class="input-group">
+						<label for="edit-area">Preferred Area</label>
+						<input type="text" id="edit-area" placeholder="e.g. Downtown">
+					</div>
+					<div style="text-align:center; margin-top:0.75rem;">
+						<button class="cta button-ripple" id="saveProfileBtn">Save</button>
+						<button class="cta button-ripple" id="cancelProfileBtn" style="background:#888; margin-left:0.5em;">Cancel</button>
+					</div>
+				</div>
+
+				<div style="text-align:center; margin-top:1rem;">
+					<button id="editProfileBtn" class="cta button-ripple">Edit Profile</button>
+				</div>
+
+				<p style="text-align:center;">Customize location preferences and safety alerts.</p>
+			</div>
+		</div>
+    <div id="help" class="screen">
+			<div class="container">
+				<h2>Help / About</h2>
+				<ul class="help-info" style="text-align:center;">
+					<li><b>What is LitPath?</b> <br> An app to help you find the safest, best-lit routes for walking at night.</li>
+					<li><b>How to report issues?</b> <br> Use the "Report Lighting" tab to submit location details.</li>
+					<li><b>Where does lighting data come from?</b> <br> Public sources, user reports, and city data.</li>
+				</ul>
+				<button class="cta button-ripple" onclick="showScreen('home')">Back to Home</button>
+			</div>
+    </div>
+  </section>
+  <script>
+    let litRoadLayer, litRoadGraph = null;
+    function addLitRoads(mapObject) {
+      fetch('baguio-lit-roads.geojson')
+        .then(r => r.json())
+        .then(geojson => {
+          if (litRoadLayer && mapObject.hasLayer(litRoadLayer)) {
+            mapObject.removeLayer(litRoadLayer);
+          }
+          litRoadLayer = L.geoJSON(geojson, {
+            style: { color: '#ffd700', weight: 7, opacity: 0.85 }
+          }).addTo(mapObject);
+          // Build graph for lit-only routing
+          litRoadGraph = buildLitRoadGraph(geojson);
+        });
+    }
+    function buildLitRoadGraph(geojson) {
+      let nodes = {}, edges = {};
+      geojson.features.forEach(f => {
+        let coords = f.geometry.coordinates;
+        for (let i = 0; i < coords.length-1; i++) {
+          let a = coords[i], b = coords[i+1];
+          let a_str = a.join(','), b_str = b.join(',');
+          nodes[a_str] = a; nodes[b_str] = b;
+          if (!edges[a_str]) edges[a_str] = [];
+          if (!edges[b_str]) edges[b_str] = [];
+          let w = distance(a,b);
+          edges[a_str].push({to: b_str, weight: w});
+          edges[b_str].push({to: a_str, weight: w});
+        }
+      });
+      return {nodes, edges};
+    }
+    function distance(a,b) {
+      let dx = a[0] - b[0], dy = a[1] - b[1];
+      return Math.sqrt(dx*dx + dy*dy);
+    }
+    function nearestLitNode(nodes, latLng) {
+      let minDist = Infinity, nearest = null;
+      Object.keys(nodes).forEach(key => {
+        let n = nodes[key];
+        let d = distance(n, [latLng[1], latLng[0]]);
+        if (d < minDist) { minDist = d; nearest = key; }
+      });
+      return nearest;
+    }
+    function dijkstra(graph, start, end) {
+      let distances = {}, prev = {}, Q = Object.keys(graph.nodes);
+      Q.forEach(node => { distances[node] = Infinity; prev[node] = null; });
+      distances[start] = 0;
+      while (Q.length > 0) {
+        let u = Q.reduce((a,b) => distances[a]<distances[b]?a:b);
+        Q = Q.filter(n => n !== u);
+        if (u === end) break;
+        let neighbors = graph.edges[u] || [];
+        neighbors.forEach(({to,weight}) => {
+          let alt = distances[u] + weight;
+          if (alt < distances[to]) {
+            distances[to] = alt;
+            prev[to] = u;
+          }
+        });
+      }
+      let path = [], u = end;
+      if (prev[u] || u === start) {
+        while(u) { path.unshift(graph.nodes[u]); u = prev[u]; }
+      }
+      return path.length > 1 ? path : null;
+    }
+    function showScreen(id) {
+      let screens = document.querySelectorAll('.screen');
+      screens.forEach(scr => {
+        scr.classList.remove('active');
+        scr.style.zIndex = 1;
+        scr.style.position = 'absolute';
+      });
+      const target = document.getElementById(id);
+      target.classList.add('active');
+      target.style.zIndex = 100;
+      target.style.position = 'static';
+      if (id === 'map') setTimeout(initLeafletMap, 100);
+    }
+    let mapInitialized = false;
+    function initLeafletMap() {
+      if (mapInitialized) return;
+      mapInitialized = true;
+      var map = L.map('mapid').setView([16.4023, 120.5960], 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+      addLitRoads(map);
+      L.marker([16.412106172231493, 120.59620938104183]).addTo(map).bindPopup('Harrison Road: Well-lit').openPopup();
+      L.marker([16.413342017732347, 120.59196839974491]).addTo(map).bindPopup('Shuntug Street: Lights Out');
+      L.marker([16.413842396114, 120.59403589212037]).addTo(map).bindPopup('Abanao Street: Dimly Lit');
+    }
+    function addRippleToButtons() {
+      document.querySelectorAll('button.button-ripple').forEach(btn => {
+        btn.removeEventListener('click', buttonRippleHandler);
+        btn.addEventListener('click', buttonRippleHandler);
+      });
+    }
+    function buttonRippleHandler(e) {
+      const btn = e.currentTarget;
+      const ripple = document.createElement('span');
+      ripple.className = 'ripple';
+      btn.appendChild(ripple);
+      const rect = btn.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      ripple.style.left = `${x - 50}px`;
+      ripple.style.top = `${y - 50}px`;
+      setTimeout(() => ripple.remove(), 600);
+    }
+    document.addEventListener('DOMContentLoaded', addRippleToButtons);
+    setTimeout(addRippleToButtons, 500);
+
+    // Make sure all relevant buttons in Welcome and Report page have the .button-ripple class
+    document.addEventListener('DOMContentLoaded', () => {
+      // Already set in HTML above! But in case buttons were added differently, you can enforce:
+      document.querySelectorAll('#onboarding .cta, #report .cta').forEach(btn => {
+        if(!btn.classList.contains('button-ripple')) btn.classList.add('button-ripple');
+      });
+    });
+
+    const BAGUIO_PLACES = {
+      "Burnham Park": [16.411288043321626, 120.5952399352773],
+      "SM Baguio": [16.408817413714342, 120.59993055716927],
+      "Session Road": [16.412823925431432, 120.59712107088126],
+      "Wright Park": [16.41388501369341, 120.62021834748622],
+      "Camp John Hay": [16.398826505919434, 120.60741055507336],
+      "Botanical Garden": [16.415038097800576, 120.61284777118958],
+      "Loakan Airport": [16.3755762027204, 120.61255987208509],
+      "Baguio Cathedral": [16.41189562604635, 120.59907255562801],
+      "City Market": [16.41493207693937, 120.59553589097696],
+      "Mines View Park": [16.41962743286897, 120.62681486991416],
+      "Teachers Camp": [16.41251327297253, 120.60914337483861],
+      "Pink Sisters Convent": [16.411559653203852, 120.6036464234618],
+      "John Hay Technohub": [16.3987746627249, 120.60846602150573],
+      "Baguio Convention Center": [16.40488492925696, 120.5995014890064],
+      "Mirador Heritage": [16.409903448853, 120.58000377643049],
+      "Good Shepherd": [16.41259851360554, 120.59827205038131],
+      "Harrison Road": [16.412107218031572, 120.59617220980469],
+      "Lourdes Grotto": [16.410479502302515, 120.58140841346537],
+      "Scout Hill": [16.3979312905935, 120.6160289167217],
+      "Aurora Hill": [16.426844404140244, 120.60742207159154]
+    };
+    let routeMap;
+    let routeControl;
+    let litRouteLayer;
+    document.addEventListener('DOMContentLoaded', () => {
+      let options = Object.keys(BAGUIO_PLACES).map(p => `<option value="${p}">`);
+      document.getElementById('from-list').innerHTML = options.join('');
+      document.getElementById('to-list').innerHTML = options.join('');
+      document.getElementById('from').value = "Burnham Park";
+      document.getElementById('to').value = "SM Baguio";
+    });
+    async function handleRoute() {
+      const fromInput = document.getElementById('from').value.trim(), toInput = document.getElementById('to').value.trim();
+      if (!BAGUIO_PLACES[fromInput] || !BAGUIO_PLACES[toInput]) {
+        alert('Please select or type valid Baguio locations from the suggestions.');
+        return;
+      }
+      if (fromInput === toInput) {
+        alert("Select two different locations.");
+        return;
+      }
+      document.getElementById('route-map').style.display = "block";
+      document.getElementById('routes').style.display = "block";
+      const fromCoords = BAGUIO_PLACES[fromInput];
+      const toCoords = BAGUIO_PLACES[toInput];
+      if (!routeMap) {
+        routeMap = L.map('route-map').setView(fromCoords, 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(routeMap);
+        addLitRoads(routeMap);
+      } else {
+        routeMap.setView(fromCoords, 14);
+        if (routeControl) routeMap.removeControl(routeControl);
+        if (litRouteLayer && routeMap.hasLayer(litRouteLayer)) routeMap.removeLayer(litRouteLayer);
+        addLitRoads(routeMap);
+      }
+      if (litRoadGraph) {
+        let startNode = nearestLitNode(litRoadGraph.nodes, [fromCoords[1], fromCoords[0]]);
+        let endNode = nearestLitNode(litRoadGraph.nodes, [toCoords[1], toCoords[0]]);
+        let litPath = dijkstra(litRoadGraph, startNode, endNode);
+        if (litPath && litPath.length>1) {
+          if (litRouteLayer && routeMap.hasLayer(litRouteLayer)) routeMap.removeLayer(litRouteLayer);
+          litRouteLayer = L.polyline(litPath.map(p=>[p[1],p[0]]), {color:'#ffd700',weight:8,opacity:0.9}).addTo(routeMap);
+          L.marker([fromCoords[0], fromCoords[1]]).addTo(routeMap).bindPopup("Start: " + fromInput).openPopup();
+          L.marker([toCoords[0], toCoords[1]]).addTo(routeMap).bindPopup("End: " + toInput);
+          document.getElementById('routes').innerHTML = `<li><b>Route (well-lit only):</b> ${fromInput} &rarr; ${toInput}</li>`;
+          return;
+        }
+      }
+			routeControl = L.Routing.control({
+				waypoints: [
+					L.latLng(fromCoords[0], fromCoords[1]),
+					L.latLng(toCoords[0], toCoords[1])
+				],
+				routeWhileDragging: false,
+				show: false,
+				draggableWaypoints: false,
+				addWaypoints: false,
+				lineOptions: {
+					styles: [{color: '#2983d7', weight: 7, opacity: 0.7}]
+				},
+				createMarker: function(i, wp, nWps) {
+					return L.marker(wp.latLng).bindPopup(i===0 ? ('Start: ' + fromInput) : ('End: ' + toInput));
+				}
+			}).addTo(routeMap);
+      document.getElementById('routes').innerHTML = `<li><b>Route:</b> ${fromInput} &rarr; ${toInput} <br> (well-lit path not available, showing shortest route)</li>`;
+    }
+		// --- Profile editing: load/save, render, and handlers ---
+		function loadProfile() {
+			const raw = localStorage.getItem('litpath_profile');
+			if (!raw) return { name: 'Jane Doe', email: 'janedoe@email.com', area: 'Downtown' };
+			try { return JSON.parse(raw); } catch(e) { return { name: 'Jane Doe', email: 'janedoe@email.com', area: 'Downtown' }; }
+		}
+		function saveProfile(profile) {
+			localStorage.setItem('litpath_profile', JSON.stringify(profile));
+		}
+		function renderProfile() {
+			const p = loadProfile();
+			document.getElementById('profile-name').textContent = p.name;
+			document.getElementById('profile-email').textContent = p.email;
+			document.getElementById('profile-area').textContent = p.area;
+		}
+		function enterEditMode() {
+			const p = loadProfile();
+			document.getElementById('edit-name').value = p.name || '';
+			document.getElementById('edit-email').value = p.email || '';
+			document.getElementById('edit-area').value = p.area || '';
+			document.getElementById('profile-view').style.display = 'none';
+			document.getElementById('profile-edit').style.display = 'block';
+			document.getElementById('editProfileBtn').style.display = 'none';
+		}
+		function exitEditMode() {
+			document.getElementById('profile-view').style.display = 'block';
+			document.getElementById('profile-edit').style.display = 'none';
+			document.getElementById('editProfileBtn').style.display = 'inline-block';
+			renderProfile();
+		}
+		document.addEventListener('DOMContentLoaded', () => {
+			renderProfile();
+			const editBtn = document.getElementById('editProfileBtn');
+			if (editBtn) editBtn.addEventListener('click', enterEditMode);
+			const saveBtn = document.getElementById('saveProfileBtn');
+			if (saveBtn) saveBtn.addEventListener('click', () => {
+				const name = document.getElementById('edit-name').value.trim();
+				const email = document.getElementById('edit-email').value.trim();
+				const area = document.getElementById('edit-area').value.trim();
+				if (!name) { alert('Please enter a name.'); return; }
+				if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { alert('Please enter a valid email or leave blank.'); return; }
+				saveProfile({ name, email: email || '—', area: area || '—' });
+				exitEditMode();
+			});
+			const cancelBtn = document.getElementById('cancelProfileBtn');
+			if (cancelBtn) cancelBtn.addEventListener('click', () => { exitEditMode(); });
+		});
+  </script>
+</body>
+</html>
