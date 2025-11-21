@@ -39,6 +39,7 @@
 /* Mobile navbar: center logo, stack links */
 @media (max-width:800px) {
   /* Navbar: Logo + nav buttons horizontal on all screens except very narrow */
+/* Main navbar flexbox layout */
 .navbar {
   display: flex;
   align-items: center;
@@ -47,15 +48,25 @@
   flex-wrap: wrap;
   background: #232b38;
   color: #fff;
-  padding: 0.6em 1em;
+  padding: 0.7em 1em 0.7em 1em;
+  width: 100%;
+  position: relative;
 }
+
 /* Logo */
+.navbar-logo-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin-right: 1em;
+}
+
 .navbar-logo {
   font-family: cursive;
   font-size: 1.7em;
   font-weight: bold;
   color: #fde47f;
-  margin-right: 1.2em;
   white-space: nowrap;
 }
 /* Nav links: horizontal row */
@@ -69,7 +80,10 @@
 }
 /* Hamburger menu (nav-toggle) hidden by default */
 .nav-toggle {
-  display: none !important;
+  display: none;
+  margin-top: 0.25em;
+  margin-left: 0px;
+  font-size: 1.5em;
 }
 /* Actions on far right */
 .nav-actions {
@@ -80,7 +94,7 @@
 }
 
 /* On very small screens (optional: stack vertically below 520px) */
-@media (max-width: 520px) {
+@media (max-width: 800px) {
   .navbar {
     flex-direction: column;
     align-items: stretch;
@@ -939,3 +953,4 @@ body::-webkit-scrollbar, .container::-webkit-scrollbar { display:none; }
   </script>
 </body>
 </html>
+
