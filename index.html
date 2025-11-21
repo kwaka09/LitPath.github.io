@@ -293,8 +293,8 @@
 		@media (max-width: 600px) {
 			/* reduce logo slightly on narrow phones */
 			.navbar-logo { font-size: 1.4em; }
-			/* Increase side margin of white working box (container) */
-			.container { margin: 1.25rem; padding: 1rem; }
+			/* On narrow phones remove left gutter so the white working box hugs left edge */
+			.container { margin: 1.25rem 1.25rem 1.25rem 0; padding: 1rem; }
 			/* Reduce map height to avoid bottom overflow */
 			#mapid, #route-map { height: 45vh; }
 			/* tighten navbar button padding to avoid wrap */
