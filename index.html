@@ -58,6 +58,12 @@
     margin-left: 0.2em;
     flex-wrap: wrap;
   }
+  .nav-actions {
+    margin-left: 0.6em;
+    display: flex;
+    align-items: center;
+    gap: 0.3em;
+  }
 }
 
 /* Mobile navbar: center logo, stack links */
@@ -67,12 +73,12 @@
 .navbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   flex-direction: row;
   flex-wrap: wrap;
   background: #232b38;
   color: #fff;
-  padding: 0.75rem 1rem;
+  padding: 0.7em 1em 0.7em 1em;
   width: 100%;
   position: relative;
 }
@@ -91,42 +97,30 @@
   font-size: 1.7em;
   font-weight: bold;
   color: #fde47f;
-  margin-right: 1.2em;
   white-space: nowrap;
 }
 /* Nav links: horizontal row */
 .nav-links {
   display: flex;
+  flex-direction: row;
   gap: 0.6rem;
   align-items: center;
+  margin-right: auto;
   margin-left: 0.3em;
-  flex-wrap: wrap;
 }
-
 /* Hamburger menu (nav-toggle) hidden by default */
 .nav-toggle {
-  background: none;
-  border: none;
-  color: #fff;
+  display: none;
+  margin-top: 0.25em;
+  margin-left: 0px;
   font-size: 1.5em;
-  cursor: pointer;
-  margin-left: auto;
-  /* Keep to far right */
-  order: 3;
-  align-self: center;
-  display: none; /* Default: hidden on desktop */
 }
-
-/* Show hamburger on mobile */
-@media (max-width: 800px) {
-  .nav-links {
-    display: none;
-  }
-  .nav-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
+/* Actions on far right */
+.nav-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-left: 0.6em;
 }
 
 /* On very small screens (optional: stack vertically below 520px) */
@@ -143,6 +137,9 @@
   .nav-links {
     flex-direction: row;
     gap: 0.2em;
+  }
+  .nav-actions {
+    margin-left: 0.2em;
   }
 }
 
@@ -189,7 +186,7 @@
 /* Hide scrollbars (optional for aesthetic) */
 body::-webkit-scrollbar, .container::-webkit-scrollbar { display:none; }
 
-		
+
 		/* Responsive nav toggle */
 		.nav-links { display:flex; gap:0.6rem; align-items:center; }
 		.nav-actions { display:flex; gap:0.5rem; align-items:center; }
@@ -551,7 +548,10 @@ body::-webkit-scrollbar, .container::-webkit-scrollbar { display:none; }
   <div class="map-blurred-bg"></div>
   <div class="map-blur-overlay"></div>
 	<nav class="navbar">
-  <span class="navbar-logo">LitPath</span>
+  <div class="navbar-logo-wrap">
+    <span class="navbar-logo">LitPath</span>
+    <button id="navToggle" class="nav-toggle button-ripple" aria-label="Toggle menu">&#9776;</button>
+  </div>
   <div class="nav-links">
     <button onclick="showScreen('home')" class="nav-link button-ripple">Home</button>
     <button onclick="showScreen('map')" class="nav-link button-ripple">Map</button>
@@ -559,9 +559,13 @@ body::-webkit-scrollbar, .container::-webkit-scrollbar { display:none; }
     <button onclick="showScreen('report')" class="nav-link button-ripple">Report Light</button>
     <button onclick="showScreen('reports-received')" class="nav-link button-ripple">Reports Received</button>
   </div>
-  <button id="navToggle" class="nav-toggle button-ripple" aria-expanded="false" aria-label="Toggle menu">&#9776;</button>
-</nav>
+  <div class="nav-actions">
+    <button id="darkModeToggle" class="button-ripple" title="Toggle Dark Mode">&#9790;</button>
+    <button onclick="showScreen('profile')" class="button-ripple" title="Profile">&#128100;</button>
+    <button onclick="showScreen('help')" class="button-ripple" title="Help">&#10067;</button>
+  </div>
 
+</nav>
 
   <section class="container">
 		<div id="home" class="screen active">
@@ -976,9 +980,3 @@ body::-webkit-scrollbar, .container::-webkit-scrollbar { display:none; }
   </script>
 </body>
 </html>
-
-
-
-
-
-
