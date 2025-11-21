@@ -62,6 +62,14 @@
 
 		/* Prevent any horizontal overflow and ensure body fits viewport */
 		html, body { max-width: 100%; overflow-x: hidden; }
+
+		/* Debug helpers: enable by adding class `debug-overflow` to <html> or <body> */
+		html.debug-overflow *, body.debug-overflow * { outline: 1px solid rgba(255,0,0,0.08); }
+		/* Strong clamps to prevent elements from exceeding viewport width */
+		img, video, iframe, #mapid, #route-map, .container, .nav-links, .nav-actions { max-width: 100%; }
+		/* Allow flex children to shrink to avoid overflow */
+		.nav-links, .nav-actions, .navbar > * { min-width: 0; }
+		button { min-width: 0; }
 		.navbar {
 			background: #232b38;
 			color: #fff;
