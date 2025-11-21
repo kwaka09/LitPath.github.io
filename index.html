@@ -252,7 +252,7 @@
     .feedback { background: #e0ffe5; border-left: 4px solid #4caf50; padding: 0.5rem 1rem; margin-top: 1rem; border-radius: 5px;}
     section.container { transition: box-shadow 0.32s; }
     #route-map-container { margin-top:1.5em; }
-	#route-map { width:100%; height:270px; border-radius:8px; background:#bdd4e7; }
+	#route-map { width:100%; height:420px; border-radius:8px; background:#bdd4e7; }
   </style>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
@@ -615,18 +615,21 @@
       document.getElementById('routes').style.display = "block";
       const fromCoords = BAGUIO_PLACES[fromInput];
       const toCoords = BAGUIO_PLACES[toInput];
-      if (!routeMap) {
-        routeMap = L.map('route-map').setView(fromCoords, 14);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(routeMap);
-        addLitRoads(routeMap);
-      } else {
-        routeMap.setView(fromCoords, 14);
-        if (routeControl) routeMap.removeControl(routeControl);
-        if (litRouteLayer && routeMap.hasLayer(litRouteLayer)) routeMap.removeLayer(litRouteLayer);
-        addLitRoads(routeMap);
-      }
+			if (!routeMap) {
+				routeMap = L.map('route-map').setView(fromCoords, 14);
+				L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+					attribution: '&copy; OpenStreetMap contributors'
+				}).addTo(routeMap);
+				addLitRoads(routeMap);
+				// Leaflet needs to be notified after the container size changes or the map is first shown
+				setTimeout(() => { try { routeMap.invalidateSize(); } catch (e) {} }, 250);
+			} else {
+				routeMap.setView(fromCoords, 14);
+				if (routeControl) routeMap.removeControl(routeControl);
+				if (litRouteLayer && routeMap.hasLayer(litRouteLayer)) routeMap.removeLayer(litRouteLayer);
+				addLitRoads(routeMap);
+				setTimeout(() => { try { routeMap.invalidateSize(); } catch (e) {} }, 250);
+			}
       if (litRoadGraph) {
         let startNode = nearestLitNode(litRoadGraph.nodes, [fromCoords[1], fromCoords[0]]);
         let endNode = nearestLitNode(litRoadGraph.nodes, [toCoords[1], toCoords[0]]);
