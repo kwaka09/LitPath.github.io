@@ -36,40 +36,9 @@
   }
 }
 
-@media (max-width: 800px) {
-  .nav-toggle {
-    display: inline-flex;
-    background: none;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    align-items: center;
-    justify-content: center;
-  }
-  .navbar-logo-wrap {
-    margin-right: 1em;
-  }
-  .nav-links {
-    display: flex;
-    flex-direction: row;
-    gap: 0.5em;
-    align-items: center;
-    margin-right: auto;
-    margin-left: 0.2em;
-    flex-wrap: wrap;
-  }
-  .nav-actions {
-    margin-left: 0.6em;
-    display: flex;
-    align-items: center;
-    gap: 0.3em;
-  }
-}
-
 /* Mobile navbar: center logo, stack links */
 @media (max-width:800px) {
   /* Navbar: Logo + nav buttons horizontal on all screens except very narrow */
-/* Main navbar flexbox layout */
 .navbar {
   display: flex;
   align-items: center;
@@ -78,25 +47,15 @@
   flex-wrap: wrap;
   background: #232b38;
   color: #fff;
-  padding: 0.7em 1em 0.7em 1em;
-  width: 100%;
-  position: fixed;
+  padding: 0.6em 1em;
 }
-
 /* Logo */
-.navbar-logo-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  margin-right: 1em;
-}
-
 .navbar-logo {
   font-family: cursive;
   font-size: 1.7em;
   font-weight: bold;
   color: #fde47f;
+  margin-right: 1.2em;
   white-space: nowrap;
 }
 /* Nav links: horizontal row */
@@ -110,10 +69,7 @@
 }
 /* Hamburger menu (nav-toggle) hidden by default */
 .nav-toggle {
-  display: none;
-  margin-top: 0.25em;
-  margin-left: 0px;
-  font-size: 1.5em;
+  display: none !important;
 }
 /* Actions on far right */
 .nav-actions {
@@ -123,60 +79,33 @@
   margin-left: 0.6em;
 }
 
-	.nav-toggle {
-  display: none;
-  margin-top: 0.25em;
-  /* Remove margin-left if present */
-  margin-left: 0px;
-  font-size: 1.5em;
-}
-
-/* Mobile hamburger: far right, absolute/relative positioning */
-@media (max-width: 800px) {
-  .nav-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;      /* Make sure the navbar is relative for this to work */
-    right: 1em;              /* Adjust as needed for padding */
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 20;
-  }
-  .navbar {
-    position: relative;
-  }
-}
-
-
 /* On very small screens (optional: stack vertically below 520px) */
 @media (max-width: 520px) {
   .navbar {
-    flex-direction: row;
-    align-items: flex-start;
-    flex-wrap: wrap;
-  }
-  .navbar-logo-wrap {
-    margin-bottom: 0px;
-    margin-right: 0.7em;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.2em 0.05em;
   }
   .nav-links {
-    flex-direction: row;
+    flex-direction: column;
     gap: 0.2em;
+    margin: 0;
+    align-items: flex-start;
+    width: 100vw;
   }
   .nav-actions {
-    margin-left: 0.2em;
+    margin-left: 0;
+    margin-top: 0.5em;
+    width: 100vw;
+    gap: 0.2em;
+    justify-content: flex-start;
+  }
+  .navbar-logo {
+    margin-bottom: 0.3em;
+    margin-right: 0;
+    font-size: 1.2em;
   }
 }
-
-	/* Only show nav-actions on desktop */
-.nav-actions.nav-desktop-only { display: flex; }
-.nav-links .nav-mobile-only { display: none; }
-@media (max-width: 800px) {
-  .nav-actions.nav-desktop-only { display: none !important; }
-  .nav-links .nav-mobile-only { display: block; width: 100%; text-align: left; }
-}
-
 
 }
 
@@ -220,7 +149,7 @@
 /* Hide scrollbars (optional for aesthetic) */
 body::-webkit-scrollbar, .container::-webkit-scrollbar { display:none; }
 
-
+		
 		/* Responsive nav toggle */
 		.nav-links { display:flex; gap:0.6rem; align-items:center; }
 		.nav-actions { display:flex; gap:0.5rem; align-items:center; }
@@ -527,16 +456,14 @@ body::-webkit-scrollbar, .container::-webkit-scrollbar { display:none; }
 <script>
 		// Dark mode toggle
 		document.addEventListener('DOMContentLoaded', function() {
-  function toggleDarkMode(btn) {
-    document.body.classList.toggle('dark-mode');
-    btn.innerHTML = document.body.classList.contains('dark-mode') ? '☀' : '☾';
-  }
-  var darkModeBtn = document.getElementById('darkModeToggle');
-  if (darkModeBtn) darkModeBtn.addEventListener('click', function() { toggleDarkMode(darkModeBtn); });
-  var darkModeBtnMobile = document.getElementById('darkModeToggleMobile');
-  if (darkModeBtnMobile) darkModeBtnMobile.addEventListener('click', function() { toggleDarkMode(darkModeBtnMobile); });
-});
-
+			const darkModeBtn = document.getElementById('darkModeToggle');
+			if (darkModeBtn) {
+				darkModeBtn.addEventListener('click', function() {
+					document.body.classList.toggle('dark-mode');
+					darkModeBtn.innerHTML = document.body.classList.contains('dark-mode') ? '&#9728;' : '&#9790;';
+				});
+			}
+		});
 	// Store reports in memory
 	const reports = [];
 
@@ -584,30 +511,21 @@ body::-webkit-scrollbar, .container::-webkit-scrollbar { display:none; }
   <div class="map-blurred-bg"></div>
   <div class="map-blur-overlay"></div>
 	<nav class="navbar">
-  <div class="navbar-logo-wrap">
-    <span class="navbar-logo">LitPath</span>
-    
-  </div>
-  <div class="nav-links">
-    <button onclick="showScreen('home')" class="nav-link button-ripple">Home</button>
-    <button onclick="showScreen('map')" class="nav-link button-ripple">Map</button>
-    <button onclick="showScreen('route')" class="nav-link button-ripple">Route Planner</button>
-    <button onclick="showScreen('report')" class="nav-link button-ripple">Report Light</button>
-    <button onclick="showScreen('reports-received')" class="nav-link button-ripple">Reports Received</button>
-    <!-- Add these next 3 inside nav-links for mobile, hide on desktop -->
-    <button id="helpMobile" onclick="showScreen('help')" class="nav-link button-ripple nav-mobile-only">❓ Help</button>
-    <button id="profileMobile" onclick="showScreen('profile')" class="nav-link button-ripple nav-mobile-only">👤 Profile</button>
-    <button id="darkModeToggleMobile" class="nav-link button-ripple nav-mobile-only" title="Toggle Dark Mode">☾ Dark Mode</button>
-  </div>
-		    <button id="navToggle" class="nav-toggle button-ripple" aria-label="Toggle menu">☰</button>
-  <div class="nav-actions nav-desktop-only">
-    <button id="darkModeToggle" class="button-ripple" title="Toggle Dark Mode">☾</button>
-    <button onclick="showScreen('profile')" class="button-ripple" title="Profile">👤</button>
-    <button onclick="showScreen('help')" class="button-ripple" title="Help">❓</button>
-  </div>
-</nav>
-
-
+		<span class="navbar-logo" style="font-family:cursive; font-size:1.7em; font-weight:bold; color:#fde47f; margin-right:1.2em; display:flex; align-items:center;">LitPath</span>
+		<button id="navToggle" class="nav-toggle button-ripple" aria-expanded="false" aria-label="Toggle menu" style="font-size:1.2em; padding:0.45em 0.7em;">&#9776;</button>
+		<div class="nav-links">
+			<button onclick="showScreen('home')" class="nav-link button-ripple">Home</button>
+			<button onclick="showScreen('map')" class="nav-link button-ripple">Map</button>
+			<button onclick="showScreen('route')" class="nav-link button-ripple">Route Planner</button>
+			<button onclick="showScreen('report')" class="nav-link button-ripple">Report Light</button>
+			<button onclick="showScreen('reports-received')" class="nav-link button-ripple">Reports Received</button>
+		</div>
+		<div class="nav-actions" style="margin-left:auto; display:flex; gap:0.5em;">
+			<button id="darkModeToggle" class="button-ripple" title="Toggle Dark Mode" style="font-size:1.3em; padding:0.5em 0.9em;">&#9790;</button>
+			<button onclick="showScreen('profile')" class="button-ripple" title="Profile" style="font-size:1.3em; padding:0.5em 0.9em;">&#128100;</button>
+			<button onclick="showScreen('help')" class="button-ripple" title="Help" style="font-size:1.3em; padding:0.5em 0.9em;">&#10067;</button>
+		</div>
+	</nav>
   <section class="container">
 		<div id="home" class="screen active">
 			<div class="container">
@@ -1021,9 +939,3 @@ body::-webkit-scrollbar, .container::-webkit-scrollbar { display:none; }
   </script>
 </body>
 </html>
-
-
-
-
-
-
