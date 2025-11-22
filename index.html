@@ -123,6 +123,32 @@
   margin-left: 0.6em;
 }
 
+	.nav-toggle {
+  display: none;
+  margin-top: 0.25em;
+  /* Remove margin-left if present */
+  margin-left: 0px;
+  font-size: 1.5em;
+}
+
+/* Mobile hamburger: far right, absolute/relative positioning */
+@media (max-width: 800px) {
+  .nav-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;      /* Make sure the navbar is relative for this to work */
+    right: 1em;              /* Adjust as needed for padding */
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+  }
+  .navbar {
+    position: relative;
+  }
+}
+
+
 /* On very small screens (optional: stack vertically below 520px) */
 @media (max-width: 520px) {
   .navbar {
@@ -994,5 +1020,6 @@ body::-webkit-scrollbar, .container::-webkit-scrollbar { display:none; }
   </script>
 </body>
 </html>
+
 
 
